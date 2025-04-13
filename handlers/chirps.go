@@ -30,12 +30,12 @@ func HandleCreateChirp(api *config.Api) func(w http.ResponseWriter, r *http.Requ
 		createChirpRequest := CreateChirpRequest{}
 		err := decoder.Decode(&createChirpRequest)
 		if err != nil {
-			respondWithError(w, "Something went wrong")
+			respondWithError(w, "Something went wrong", http.StatusBadRequest)
 			return
 		}
 
 		if len(createChirpRequest.Body) > 140 {
-			respondWithError(w, "Chirp is too long")
+			respondWithError(w, "Chirp is too long", http.StatusBadRequest)
 			return
 		}
 
@@ -52,7 +52,7 @@ func HandleCreateChirp(api *config.Api) func(w http.ResponseWriter, r *http.Requ
 			},
 		)
 		if err != nil {
-			respondWithError(w, err.Error())
+			respondWithError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -65,7 +65,7 @@ func HandleListChirps(api *config.Api) func(w http.ResponseWriter, r *http.Reque
 
 		chirps, err := api.Queries.ListChirps(r.Context())
 		if err != nil {
-			respondWithError(w, err.Error())
+			respondWithError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
@@ -75,6 +75,23 @@ func HandleListChirps(api *config.Api) func(w http.ResponseWriter, r *http.Reque
 		}
 
 		printJsonResponse(w, results, http.StatusOK)
+	}
+}
+
+func HandleGetChirp(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		value := r.PathValue("chirpID")
+		if value == "" {
+			respondWithError(w, "ChirpID path variable is mandatory", http.StatusBadRequest)
+		}
+
+		chirp, err := api.Queries.GetChirp(r.Context(), uuid.MustParse(value))
+		if err != nil {
+			respondWithError(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		printJsonResponse(w, mapChirp(chirp), http.StatusOK)
 	}
 }
 

@@ -26,13 +26,13 @@ func HandlerCreateUser(api *config.Api) func(w http.ResponseWriter, r *http.Requ
 		requestBody := CreateUserRequest{}
 		err := decoder.Decode(&requestBody)
 		if err != nil {
-			respondWithError(w, "Something went wrong")
+			respondWithError(w, "Something went wrong", http.StatusBadRequest)
 			return
 		}
 
 		user, err := api.Queries.CreateUser(r.Context(), requestBody.Email)
 		if err != nil {
-			respondWithError(w, err.Error())
+			respondWithError(w, err.Error(), http.StatusBadRequest)
 		}
 
 		printJsonResponse(w, mapUser(user), http.StatusCreated)

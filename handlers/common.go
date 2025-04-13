@@ -12,8 +12,8 @@ const applicationJsonContentType = "application/json; charset=utf-8"
 const textPlainContentType = "text/plain; charset=utf-8"
 const textHtmlContentType = "text/html; charset=utf-8"
 
-func respondWithError(w http.ResponseWriter, errorMessage string) {
-	printResponse(w, errorMessage, applicationJsonContentType, http.StatusBadRequest)
+func respondWithError(w http.ResponseWriter, errorMessage string, status int) {
+	printResponse(w, errorMessage, applicationJsonContentType, status)
 }
 
 func printJsonResponse(w http.ResponseWriter, respBody any, statusCode int) {

@@ -11,7 +11,7 @@ import (
 
 const listChirps = `-- name: ListChirps :many
 SELECT id, created_at, updated_at, body, user_id
-FROM chirps where id is not null
+FROM chirps
 ORDER BY created_at
 `
 
