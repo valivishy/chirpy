@@ -29,6 +29,8 @@ func main() {
 
 	mux.HandleFunc("POST /api/validate_chirp", handlers.HandleValidateChirp)
 
+	mux.HandleFunc("POST /api/users", handlers.HandlerCreateUser(apiConfig))
+
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: mux,
@@ -49,8 +51,14 @@ func initApiConfig() *config.Api {
 		panic(err)
 	}
 
+	platform := os.Getenv("PLATFORM")
+	if platform == "" {
+		platform = config.Dev
+	}
+
 	apiConfig := &config.Api{
-		Queries: database.New(db),
+		Queries:  database.New(db),
+		Platform: platform,
 	}
 	return apiConfig
 }

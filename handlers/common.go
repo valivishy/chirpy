@@ -16,7 +16,7 @@ func respondWithError(w http.ResponseWriter, errorMessage string) {
 	printResponse(w, errorMessage, applicationJsonContentType, http.StatusBadRequest)
 }
 
-func printJsonResponse(w http.ResponseWriter, respBody ValidationResponse, statusCode int) {
+func printJsonResponse(w http.ResponseWriter, respBody any, statusCode int) {
 	dat, err := json.Marshal(respBody)
 	if err != nil {
 		log.Printf("Error marshalling JSON: %s", err)

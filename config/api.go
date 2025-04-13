@@ -8,4 +8,9 @@ import (
 type Api struct {
 	FileServerHits atomic.Int32
 	Queries        *database.Queries
+	Platform       string
 }
+
+const (
+	Dev string = "DEV"
+)

@@ -5,6 +5,16 @@ import (
 	"net/http"
 )
 
+type ValidationRequest struct {
+	Body string `json:"body"`
+}
+
+type ValidationResponse struct {
+	Error       *string `json:"error"`
+	Valid       *bool   `json:"valid"`
+	CleanedBody *string `json:"cleaned_body"`
+}
+
 func HandleValidateChirp(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	requestBody := ValidationRequest{}

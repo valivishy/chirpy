@@ -26,7 +26,17 @@ func HandleAdminMetrics(apiConfig *config.Api) func(w http.ResponseWriter, r *ht
 
 func HandleAdminReset(apiConfig *config.Api) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		if apiConfig.Platform != config.Dev {
+			printResponse(w, "", textPlainContentType, http.StatusForbidden)
+			return
+		}
+
 		apiConfig.FileServerHits.Swap(0)
+		if err := apiConfig.Queries.DeleteUsers(r.Context()); err != nil {
+			printResponse(w, "", textHtmlContentType, http.StatusInternalServerError)
+			return
+		}
+
 		printResponse(w, "", textPlainContentType, http.StatusOK)
 	}
 }
