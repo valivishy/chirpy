@@ -30,6 +30,7 @@ func main() {
 	mux.HandleFunc("POST /api/users", handlers.HandlerCreateUser(apiConfig))
 
 	mux.HandleFunc("POST /api/chirps", handlers.HandleCreateChirp(apiConfig))
+	mux.HandleFunc("GET /api/chirps", handlers.HandleListChirps(apiConfig))
 
 	server := http.Server{
 		Addr:    ":8080",

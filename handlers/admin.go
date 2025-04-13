@@ -37,6 +37,11 @@ func HandleAdminReset(apiConfig *config.Api) func(w http.ResponseWriter, r *http
 			return
 		}
 
+		if err := apiConfig.Queries.DeleteChirps(r.Context()); err != nil {
+			printResponse(w, "", textHtmlContentType, http.StatusInternalServerError)
+			return
+		}
+
 		printResponse(w, "", textPlainContentType, http.StatusOK)
 	}
 }

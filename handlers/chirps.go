@@ -14,7 +14,7 @@ type CreateChirpRequest struct {
 	UserId uuid.UUID `json:"user_id"`
 }
 
-type CreateChirpResponse struct {
+type ChirpDTO struct {
 	Error     *string    `json:"error"`
 	Valid     *bool      `json:"valid"`
 	ID        *uuid.UUID `json:"id"`
@@ -60,8 +60,26 @@ func HandleCreateChirp(api *config.Api) func(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func mapChirp(chirp database.Chirp) CreateChirpResponse {
-	return CreateChirpResponse{
+func HandleListChirps(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		chirps, err := api.Queries.ListChirps(r.Context())
+		if err != nil {
+			respondWithError(w, err.Error())
+			return
+		}
+
+		var results []ChirpDTO
+		for _, chirp := range chirps {
+			results = append(results, mapChirp(chirp))
+		}
+
+		printJsonResponse(w, results, http.StatusOK)
+	}
+}
+
+func mapChirp(chirp database.Chirp) ChirpDTO {
+	return ChirpDTO{
 		ID:        &chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.UpdatedAt,
