@@ -59,6 +59,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatalf("failed to connect to admin DB: %v", err)
 	}
+
 	defer func(adminDB *sql.DB) {
 		err := adminDB.Close()
 		if err != nil {
