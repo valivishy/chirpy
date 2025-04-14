@@ -7,13 +7,13 @@ import (
 
 func TestHandleHealthz(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	resp, err := http.Get(ts.BaseURL + "/api/healthz")
 	if err != nil {
 		t.Fatalf("failed to GET /api/healthz: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected status 200, got %d", resp.StatusCode)

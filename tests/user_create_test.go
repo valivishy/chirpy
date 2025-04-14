@@ -12,14 +12,14 @@ import (
 
 func TestHandleCreateUser(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	createUser(t, ts, "test@example.com", "superPassword123")
 }
 
 func TestHandleCreateUser_Duplicate(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	email := "test2@example.com"
 	password := "superPassword1232"
@@ -31,7 +31,7 @@ func TestHandleCreateUser_Duplicate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("duplicate POST failed: %v", err)
 	}
-	defer Closer(t)(resp2.Body)
+	defer closer(t)(resp2.Body)
 
 	if resp2.StatusCode != http.StatusBadRequest {
 		t.Errorf("expected status 400 Bad Request for duplicate user, got %d", resp2.StatusCode)
@@ -40,22 +40,18 @@ func TestHandleCreateUser_Duplicate(t *testing.T) {
 
 func TestHandleCreateUser_InvalidPayload(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	invalidPayload := `{"email": 123, "password": true}`
 	resp, err := http.Post(ts.BaseURL+"/api/users", "application/json", strings.NewReader(invalidPayload))
 	if err != nil {
 		t.Fatalf("POST with invalid payload failed: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusBadRequest {
 		t.Errorf("expected status 400 Bad Request for invalid payload, got %d", resp.StatusCode)
 	}
-}
-
-func buildUserCreateOrLoginPayload(email string, password string) string {
-	return fmt.Sprintf(`{"email":"%s", "password":"%s"}`, email, password)
 }
 
 func createUser(
@@ -67,7 +63,7 @@ func createUser(
 	if err != nil {
 		t.Fatalf("failed to POST /api/users: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusCreated {
 		t.Fatalf("expected status 201 Created, got %d", resp.StatusCode)

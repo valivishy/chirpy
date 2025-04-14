@@ -8,7 +8,7 @@ import (
 
 func TestHandleLogin_Success(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	email := "valid@example.com"
 	password := "correctPassword"
@@ -19,7 +19,7 @@ func TestHandleLogin_Success(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to POST /api/login: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
@@ -28,14 +28,14 @@ func TestHandleLogin_Success(t *testing.T) {
 
 func TestHandleLogin_UserNotFound(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	loginPayload := buildUserCreateOrLoginPayload("nouser@example.com", "irrelevant")
 	resp, err := http.Post(ts.BaseURL+"/api/login", "application/json", strings.NewReader(loginPayload))
 	if err != nil {
 		t.Fatalf("POST failed: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusUnauthorized {
 		t.Errorf("expected 401 Unauthorized for missing user, got %d", resp.StatusCode)
@@ -44,7 +44,7 @@ func TestHandleLogin_UserNotFound(t *testing.T) {
 
 func TestHandleLogin_WrongPassword(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	email := "user@example.com"
 	correctPassword := "goodPass"
@@ -56,7 +56,7 @@ func TestHandleLogin_WrongPassword(t *testing.T) {
 	if err != nil {
 		t.Fatalf("POST failed: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusUnauthorized {
 		t.Errorf("expected 401 Unauthorized for wrong password, got %d", resp.StatusCode)
@@ -65,14 +65,14 @@ func TestHandleLogin_WrongPassword(t *testing.T) {
 
 func TestHandleLogin_InvalidEmailFormat(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	payload := buildUserCreateOrLoginPayload("1234", "irrelevant")
 	resp, err := http.Post(ts.BaseURL+"/api/login", "application/json", strings.NewReader(payload))
 	if err != nil {
 		t.Fatalf("POST failed: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusUnauthorized {
 		t.Errorf("expected 400 Bad Request for invalid payload, got %d", resp.StatusCode)

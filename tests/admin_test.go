@@ -9,13 +9,13 @@ import (
 
 func TestHandleAdminMetrics(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	resp, err := http.Get(ts.BaseURL + "/admin/metrics")
 	if err != nil {
 		t.Fatalf("failed to GET /admin/metrics: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected status 200, got %d", resp.StatusCode)
@@ -37,13 +37,13 @@ func TestHandleAdminMetrics(t *testing.T) {
 
 func TestHandleAdminReset(t *testing.T) {
 	ts := Start(t)
-	defer Closer(t)(ts.Server)
+	defer closer(t)(ts.Server)
 
 	resp, err := http.Post(ts.BaseURL+"/admin/reset", "application/json", strings.NewReader(""))
 	if err != nil {
 		t.Fatalf("failed to POST /admin/reset: %v", err)
 	}
-	defer Closer(t)(resp.Body)
+	defer closer(t)(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("expected status 200, got %d", resp.StatusCode)

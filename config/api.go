@@ -12,6 +12,7 @@ type Configuration struct {
 	FileServerHits atomic.Int32
 	Queries        *database.Queries
 	Platform       string
+	Secret         string
 }
 
 const (
@@ -32,6 +33,11 @@ func Init() *Configuration {
 	platform := os.Getenv("PLATFORM")
 	if platform == "" {
 		platform = Dev
+	}
+
+	secret := os.Getenv("SECRET")
+	if secret == "" {
+		panic("No password signing secret provided")
 	}
 
 	return &Configuration{

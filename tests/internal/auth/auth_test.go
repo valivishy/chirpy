@@ -4,6 +4,7 @@ import (
 	"chirpy/internal/auth"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
 	"testing"
 	"time"
 )
@@ -81,4 +82,41 @@ func TestValidateJWT_WrongSecret(t *testing.T) {
 	if err == nil {
 		t.Error("expected error for wrong secret, got nil")
 	}
+}
+
+func TestGetBearerToken(t *testing.T) {
+	t.Run("valid token", func(t *testing.T) {
+		headers := http.Header{}
+		headers.Set("Authorization", "Bearer abc.def.ghi")
+
+		token, err := auth.GetBearerToken(headers)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if token != "abc.def.ghi" {
+			t.Errorf("expected 'abc.def.ghi', got '%s'", token)
+		}
+	})
+
+	t.Run("missing header", func(t *testing.T) {
+		headers := http.Header{}
+
+		_, err := auth.GetBearerToken(headers)
+		if err == nil {
+			t.Fatal("expected error for missing header, got nil")
+		}
+	})
+
+	t.Run("no Bearer prefix", func(t *testing.T) {
+		headers := http.Header{}
+		headers.Set("Authorization", "abc.def.ghi")
+
+		token, err := auth.GetBearerToken(headers)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if token != "abc.def.ghi" {
+			t.Errorf("expected token without prefix untouched, got '%s'", token)
+		}
+	})
 }
