@@ -2,8 +2,10 @@ package tests
 
 import (
 	"chirpy/internal/auth"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"testing"
+	"time"
 )
 
 func TestHashPassword_Success(t *testing.T) {
@@ -38,5 +40,45 @@ func TestCheckPasswordHash_Failure(t *testing.T) {
 	err := auth.CheckPasswordHash(string(hash), "wrongpassword")
 	if err == nil {
 		t.Error("expected error for mismatched password, got nil")
+	}
+}
+
+func TestMakeAndValidateJWT(t *testing.T) {
+	userID := uuid.New()
+	secret := "supersecret"
+	expiresIn := time.Hour
+
+	token, err := auth.MakeJWT(userID, secret, expiresIn)
+	if err != nil {
+		t.Fatalf("failed to generate JWT: %v", err)
+	}
+
+	parsedUserID, err := auth.ValidateJWT(token, secret)
+	if err != nil {
+		t.Fatalf("failed to validate JWT: %v", err)
+	}
+
+	if parsedUserID != userID {
+		t.Errorf("expected userID %s, got %s", userID, parsedUserID)
+	}
+}
+
+func TestValidateJWT_InvalidToken(t *testing.T) {
+	_, err := auth.ValidateJWT("not.a.valid.token", "secret")
+	if err == nil {
+		t.Error("expected error for invalid token, got nil")
+	}
+}
+
+func TestValidateJWT_WrongSecret(t *testing.T) {
+	userID := uuid.New()
+	token, err := auth.MakeJWT(userID, "rightsecret", time.Hour)
+	if err != nil {
+		t.Fatalf("failed to generate JWT: %v", err)
+	}
+
+	_, err = auth.ValidateJWT(token, "wrongsecret")
+	if err == nil {
+		t.Error("expected error for wrong secret, got nil")
 	}
 }
