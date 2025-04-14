@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func HandleAdminMetrics(apiConfig *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleAdminMetrics(apiConfig *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	body := `<html>
 		  <body>
 			<h1>Welcome, Chirpy Admin</h1>
@@ -24,9 +24,9 @@ func HandleAdminMetrics(apiConfig *config.Api) func(w http.ResponseWriter, r *ht
 	}
 }
 
-func HandleAdminReset(apiConfig *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleAdminReset(apiConfig *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		if apiConfig.Platform != config.Dev {
+		if apiConfig.Platform != config.Dev && apiConfig.Platform != config.Test {
 			printResponse(w, "", textPlainContentType, http.StatusForbidden)
 			return
 		}

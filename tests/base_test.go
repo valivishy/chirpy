@@ -7,7 +7,6 @@ import (
 	"chirpy/router"
 	"database/sql"
 	"errors"
-	"github.com/joho/godotenv"
 	"github.com/pressly/goose/v3"
 	"log"
 	"net"
@@ -28,8 +27,7 @@ var testDB *sql.DB
 func Start(t *testing.T) *TestServer {
 	t.Helper()
 
-	apiConfig := &config.Api{}
-	handler := router.New(apiConfig)
+	handler := router.New(config.Init())
 
 	ln, err := net.Listen("tcp", "127.0.0.1:0")
 	if err != nil {
@@ -51,9 +49,7 @@ func Start(t *testing.T) *TestServer {
 }
 
 func TestMain(m *testing.M) {
-	if err := godotenv.Load(".env.test"); err != nil {
-		log.Fatalf("failed to load .env.test: %v", err)
-	}
+	config.Init()
 
 	dbName := "chirpy_test"
 	dbURL := os.Getenv("DB_URL")

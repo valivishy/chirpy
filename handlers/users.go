@@ -12,7 +12,7 @@ import (
 
 const somethingWentWrong = "Something went wrong"
 
-func HandleCreate(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleCreate(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		requestBody := models.CreateUserRequest{}
@@ -41,7 +41,7 @@ func HandleCreate(api *config.Api) func(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-func HandleLogin(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleLogin(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		requestBody := models.LoginUserRequest{}

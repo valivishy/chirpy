@@ -24,7 +24,7 @@ type ChirpDTO struct {
 	UserID    *uuid.UUID `json:"user_id"`
 }
 
-func HandleCreateChirp(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleCreateChirp(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
 		createChirpRequest := CreateChirpRequest{}
@@ -60,7 +60,7 @@ func HandleCreateChirp(api *config.Api) func(w http.ResponseWriter, r *http.Requ
 	}
 }
 
-func HandleListChirps(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleListChirps(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		chirps, err := api.Queries.ListChirps(r.Context())
@@ -78,7 +78,7 @@ func HandleListChirps(api *config.Api) func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func HandleGetChirp(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleGetChirp(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		value := r.PathValue("chirpID")
 		if value == "" {

@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func New(apiConfig *config.Api) http.Handler {
+func New(apiConfig *config.Configuration) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.Handle("/app/", middleware.MetricsInc(apiConfig, http.StripPrefix("/app", http.FileServer(http.Dir(".")))))
