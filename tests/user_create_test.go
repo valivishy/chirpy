@@ -23,7 +23,7 @@ func TestHandleCreateUser_Duplicate(t *testing.T) {
 	password := "superPassword1232"
 
 	createUser(t, ts, email, password)
-	payload := buildUserCreatePayload(email, password)
+	payload := buildUserCreateOrLoginPayload(email, password)
 
 	resp2, err := http.Post(ts.BaseURL+"/api/users", "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -52,7 +52,7 @@ func TestHandleCreateUser_InvalidPayload(t *testing.T) {
 	}
 }
 
-func buildUserCreatePayload(email string, password string) string {
+func buildUserCreateOrLoginPayload(email string, password string) string {
 	return fmt.Sprintf(`{"email":"%s", "password":"%s"}`, email, password)
 }
 
