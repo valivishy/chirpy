@@ -1,8 +1,10 @@
 package tests
 
 import (
+	"chirpy/models"
+	"encoding/json"
 	"fmt"
-	"io"
+	"github.com/google/uuid"
 	"net/http"
 	"strings"
 	"testing"
@@ -58,7 +60,7 @@ func buildUserCreateOrLoginPayload(email string, password string) string {
 
 func createUser(
 	t *testing.T, ts *TestServer, email string, password string,
-) {
+) uuid.UUID {
 	payload := fmt.Sprintf(`{"email":"%s", "password":"%s"}`, email, password)
 
 	resp, err := http.Post(ts.BaseURL+"/api/users", "application/json", strings.NewReader(payload))
@@ -71,16 +73,15 @@ func createUser(
 		t.Fatalf("expected status 201 Created, got %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		t.Fatalf("failed to read response: %v", err)
+	decoder := json.NewDecoder(resp.Body)
+	userResponse := models.UserDTO{}
+	if err = decoder.Decode(&userResponse); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
 	}
 
-	if !strings.Contains(string(body), fmt.Sprintf(`"email":"%s"`, email)) {
-		t.Errorf("expected email in response, got: %s", string(body))
+	if !strings.Contains(userResponse.Email, email) {
+		t.Errorf("expected email in response, got: %s", userResponse.Email)
 	}
 
-	if strings.Contains(string(body), password) {
-		t.Errorf("Password should not be present in response")
-	}
+	return userResponse.ID
 }

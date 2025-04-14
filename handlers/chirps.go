@@ -30,7 +30,7 @@ func HandleCreateChirp(api *config.Configuration) func(w http.ResponseWriter, r 
 		createChirpRequest := CreateChirpRequest{}
 		err := decoder.Decode(&createChirpRequest)
 		if err != nil {
-			respondWithError(w, "Something went wrong", http.StatusBadRequest)
+			respondWithError(w, "Invalid payload", http.StatusBadRequest)
 			return
 		}
 
