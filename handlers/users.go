@@ -2,48 +2,66 @@ package handlers
 
 import (
 	"chirpy/config"
+	"chirpy/internal/auth"
 	"chirpy/internal/database"
+	"chirpy/mappers"
+	"chirpy/models"
 	"encoding/json"
-	"github.com/google/uuid"
 	"net/http"
-	"time"
 )
 
-type CreateUserRequest struct {
-	Email string `json:"email"`
-}
+const somethingWentWrong = "Something went wrong"
 
-type UserDTO struct {
-	ID        uuid.UUID `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	Email     string    `json:"email"`
-}
-
-func HandlerCreateUser(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+func HandleCreate(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
-		requestBody := CreateUserRequest{}
+		requestBody := models.CreateUserRequest{}
 		err := decoder.Decode(&requestBody)
+
 		if err != nil {
-			respondWithError(w, "Something went wrong", http.StatusBadRequest)
+			respondWithError(w, somethingWentWrong, http.StatusBadRequest)
 			return
 		}
 
-		user, err := api.Queries.CreateUser(r.Context(), requestBody.Email)
+		password, err := auth.HashPassword(requestBody.Password)
+		if err != nil {
+			respondWithError(w, somethingWentWrong, http.StatusInternalServerError)
+			return
+		}
+
+		user, err := api.Queries.CreateUser(r.Context(), database.CreateUserParams{
+			Email:          requestBody.Email,
+			HashedPassword: password,
+		})
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusBadRequest)
 		}
 
-		printJsonResponse(w, mapUser(user), http.StatusCreated)
+		printJsonResponse(w, mappers.MapUser(user), http.StatusCreated)
 	}
 }
 
-func mapUser(user database.User) UserDTO {
-	return UserDTO{
-		ID:        user.ID,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
-		Email:     user.Email,
+func HandleLogin(api *config.Api) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		decoder := json.NewDecoder(r.Body)
+		requestBody := models.LoginUserRequest{}
+		err := decoder.Decode(&requestBody)
+		if err != nil {
+			respondWithError(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		user, err := api.Queries.GetUserByEmail(r.Context(), requestBody.Email)
+		if err != nil {
+			respondWithError(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if err := auth.CheckPasswordHash(user.HashedPassword, requestBody.Password); err != nil {
+			respondWithError(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		printJsonResponse(w, mappers.MapUser(user), http.StatusOK)
 	}
 }

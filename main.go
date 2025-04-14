@@ -2,9 +2,8 @@ package main
 
 import (
 	"chirpy/config"
-	"chirpy/handlers"
 	"chirpy/internal/database"
-	"chirpy/middleware"
+	"chirpy/router"
 	"database/sql"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -16,26 +15,9 @@ import (
 )
 
 func main() {
-	apiConfig := initApiConfig()
-
-	mux := http.NewServeMux()
-
-	mux.Handle("/app/", middleware.MetricsInc(apiConfig, http.StripPrefix("/app", http.FileServer(http.Dir(".")))))
-
-	mux.HandleFunc("GET /api/healthz", handlers.HandleHealthz)
-
-	mux.HandleFunc("GET /admin/metrics", handlers.HandleAdminMetrics(apiConfig))
-	mux.HandleFunc("POST /admin/reset", handlers.HandleAdminReset(apiConfig))
-
-	mux.HandleFunc("POST /api/users", handlers.HandlerCreateUser(apiConfig))
-
-	mux.HandleFunc("POST /api/chirps", handlers.HandleCreateChirp(apiConfig))
-	mux.HandleFunc("GET /api/chirps", handlers.HandleListChirps(apiConfig))
-	mux.HandleFunc("GET /api/chirps/{chirpID}", handlers.HandleGetChirp(apiConfig))
-
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: mux,
+		Handler: router.New(initApiConfig()),
 	}
 
 	if err := server.ListenAndServe(); err != nil {

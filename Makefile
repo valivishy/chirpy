@@ -12,7 +12,10 @@ build:
 run:
 	./chirpy
 
-build-and-run: clean lint build run
+test:
+	go test -v ./tests/...
+
+build-and-run: clean lint test build run
 
 start:
 	find . -name '*.go' | entr -r make build-and-run
