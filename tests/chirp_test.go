@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"chirpy/models"
 	"fmt"
 	"io"
 	"net/http"
@@ -15,8 +16,8 @@ func TestHandleCreateChirp_Valid(t *testing.T) {
 	email := "chirper@example.com"
 	password := "chirpy123"
 	userId := createUser(t, ts, email, password)
-
-	body := `{"body":"Hello Chirpy!", "user_id":"` + userId.String() + `"}`
+	chirpBody := "Hello Chirpy!"
+	body := `{"body":"` + chirpBody + `", "user_id":"` + userId.String() + `"}`
 
 	resp, err := http.Post(ts.BaseURL+"/api/chirps", "application/json", strings.NewReader(body))
 	if err != nil {
@@ -26,6 +27,27 @@ func TestHandleCreateChirp_Valid(t *testing.T) {
 
 	if resp.StatusCode != http.StatusCreated {
 		t.Errorf("expected 201 Created, got %d", resp.StatusCode)
+	}
+
+	var chirps []models.ChirpDTO
+	get(t, ts, "/api/chirps", &chirps)
+
+	var chirp models.ChirpDTO
+	for _, listedChirp := range chirps {
+		if userId == *listedChirp.UserID && *listedChirp.Body == chirpBody {
+			chirp = listedChirp
+			break
+		}
+	}
+	if chirp.ID == nil {
+		t.Errorf("chirp not created")
+		return
+	}
+
+	get(t, ts, "/api/chirps/"+chirp.ID.String(), &chirp)
+	if chirp.UserID == nil {
+		t.Errorf("chirp was not found")
+		return
 	}
 }
 

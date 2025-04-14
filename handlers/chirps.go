@@ -3,31 +3,16 @@ package handlers
 import (
 	"chirpy/config"
 	"chirpy/internal/database"
+	"chirpy/models"
 	"encoding/json"
 	"github.com/google/uuid"
 	"net/http"
-	"time"
 )
-
-type CreateChirpRequest struct {
-	Body   string    `json:"body"`
-	UserId uuid.UUID `json:"user_id"`
-}
-
-type ChirpDTO struct {
-	Error     *string    `json:"error"`
-	Valid     *bool      `json:"valid"`
-	ID        *uuid.UUID `json:"id"`
-	CreatedAt time.Time  `json:"created_at"`
-	UpdatedAt time.Time  `json:"updated_at"`
-	Body      *string    `json:"body"`
-	UserID    *uuid.UUID `json:"user_id"`
-}
 
 func HandleCreateChirp(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		decoder := json.NewDecoder(r.Body)
-		createChirpRequest := CreateChirpRequest{}
+		createChirpRequest := models.CreateChirpRequest{}
 		err := decoder.Decode(&createChirpRequest)
 		if err != nil {
 			respondWithError(w, "Invalid payload", http.StatusBadRequest)
@@ -69,7 +54,7 @@ func HandleListChirps(api *config.Configuration) func(w http.ResponseWriter, r *
 			return
 		}
 
-		var results []ChirpDTO
+		var results []models.ChirpDTO
 		for _, chirp := range chirps {
 			results = append(results, mapChirp(chirp))
 		}
@@ -95,8 +80,8 @@ func HandleGetChirp(api *config.Configuration) func(w http.ResponseWriter, r *ht
 	}
 }
 
-func mapChirp(chirp database.Chirp) ChirpDTO {
-	return ChirpDTO{
+func mapChirp(chirp database.Chirp) models.ChirpDTO {
+	return models.ChirpDTO{
 		ID:        &chirp.ID,
 		CreatedAt: chirp.CreatedAt,
 		UpdatedAt: chirp.UpdatedAt,

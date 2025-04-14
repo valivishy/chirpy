@@ -1,6 +1,9 @@
 package tests
 
-import _ "github.com/lib/pq"
+import (
+	"encoding/json"
+	_ "github.com/lib/pq"
+)
 
 import (
 	"chirpy/config"
@@ -91,4 +94,22 @@ func TestMain(m *testing.M) {
 	_, _ = adminDB.Exec("DROP DATABASE IF EXISTS " + dbName)
 
 	os.Exit(code)
+}
+
+func get[T any](t *testing.T, ts *TestServer, url string, target *T) {
+	t.Helper()
+
+	resp, err := http.Get(ts.BaseURL + url)
+	if err != nil {
+		t.Fatalf("GET %s failed: %v", url, err)
+	}
+	defer Closer(t)(resp.Body)
+
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
+		t.Fatalf("failed to decode response body: %v", err)
+	}
 }
