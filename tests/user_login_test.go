@@ -15,9 +15,9 @@ func TestHandleLogin_Success(t *testing.T) {
 	createUser(t, ts, email, password)
 
 	loginPayload := buildUserCreateOrLoginPayload(email, password)
-	resp, err := http.Post(ts.BaseURL+"/api/users/login", "application/json", strings.NewReader(loginPayload))
+	resp, err := http.Post(ts.BaseURL+"/api/login", "application/json", strings.NewReader(loginPayload))
 	if err != nil {
-		t.Fatalf("failed to POST /api/users/login: %v", err)
+		t.Fatalf("failed to POST /api/login: %v", err)
 	}
 	defer Closer(t)(resp.Body)
 
@@ -31,7 +31,7 @@ func TestHandleLogin_UserNotFound(t *testing.T) {
 	defer Closer(t)(ts.Server)
 
 	loginPayload := buildUserCreateOrLoginPayload("nouser@example.com", "irrelevant")
-	resp, err := http.Post(ts.BaseURL+"/api/users/login", "application/json", strings.NewReader(loginPayload))
+	resp, err := http.Post(ts.BaseURL+"/api/login", "application/json", strings.NewReader(loginPayload))
 	if err != nil {
 		t.Fatalf("POST failed: %v", err)
 	}
@@ -52,7 +52,7 @@ func TestHandleLogin_WrongPassword(t *testing.T) {
 	createUser(t, ts, email, correctPassword)
 
 	loginPayload := buildUserCreateOrLoginPayload(email, wrongPassword)
-	resp, err := http.Post(ts.BaseURL+"/api/users/login", "application/json", strings.NewReader(loginPayload))
+	resp, err := http.Post(ts.BaseURL+"/api/login", "application/json", strings.NewReader(loginPayload))
 	if err != nil {
 		t.Fatalf("POST failed: %v", err)
 	}
@@ -68,7 +68,7 @@ func TestHandleLogin_InvalidEmailFormat(t *testing.T) {
 	defer Closer(t)(ts.Server)
 
 	payload := buildUserCreateOrLoginPayload("1234", "irrelevant")
-	resp, err := http.Post(ts.BaseURL+"/api/users/login", "application/json", strings.NewReader(payload))
+	resp, err := http.Post(ts.BaseURL+"/api/login", "application/json", strings.NewReader(payload))
 	if err != nil {
 		t.Fatalf("POST failed: %v", err)
 	}

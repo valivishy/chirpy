@@ -53,12 +53,12 @@ func HandleLogin(api *config.Configuration) func(w http.ResponseWriter, r *http.
 
 		user, err := api.Queries.GetUserByEmail(r.Context(), requestBody.Email)
 		if err != nil {
-			respondWithError(w, err.Error(), http.StatusUnauthorized)
+			respondWithError(w, "", http.StatusUnauthorized)
 			return
 		}
 
 		if err := auth.CheckPasswordHash(user.HashedPassword, requestBody.Password); err != nil {
-			respondWithError(w, err.Error(), http.StatusUnauthorized)
+			respondWithError(w, "", http.StatusUnauthorized)
 			return
 		}
 
