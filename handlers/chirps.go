@@ -6,6 +6,7 @@ import (
 	"chirpy/models"
 	"github.com/google/uuid"
 	"net/http"
+	"sort"
 )
 
 func HandleCreateChirp(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
@@ -51,6 +52,7 @@ func HandleCreateChirp(configuration *config.Configuration) func(w http.Response
 func HandleListChirps(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userId := r.URL.Query().Get("author_id")
+		sortParam := getSortParam(r)
 
 		var chirps []database.Chirp
 		var err error
@@ -74,6 +76,13 @@ func HandleListChirps(api *config.Configuration) func(w http.ResponseWriter, r *
 		for _, chirp := range chirps {
 			results = append(results, mapChirp(chirp))
 		}
+
+		sort.Slice(results, func(i, j int) bool {
+			if sortParam == "desc" {
+				return chirps[i].CreatedAt.After(chirps[j].CreatedAt)
+			}
+			return chirps[i].CreatedAt.Before(chirps[j].CreatedAt)
+		})
 
 		printJsonResponse(w, results, http.StatusOK)
 	}
@@ -151,4 +160,12 @@ func getChirp(w http.ResponseWriter, r *http.Request, configuration *config.Conf
 	}
 
 	return chirp, false
+}
+
+func getSortParam(r *http.Request) string {
+	sortParam := r.URL.Query().Get("sort")
+	if sortParam != "asc" && sortParam != "desc" {
+		sortParam = "asc"
+	}
+	return sortParam
 }

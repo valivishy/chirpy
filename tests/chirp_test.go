@@ -90,6 +90,33 @@ func TestHandleDeleteChirpByAnotherUser_Fails(t *testing.T) {
 	execDelete(t, ts, "/api/chirps/"+chirp.ID.String(), user2.Token, http.StatusForbidden)
 }
 
+func TestHandleListChirps_SortingWorks(t *testing.T) {
+	ts := Start(t)
+	defer closer(t)(ts.Server)
+
+	user := createAndLoginUser(t, ts, "chirper_list_chirps_sort@example.com", "chirpy123")
+
+	createChirp(t, ts, &user)
+	createChirp(t, ts, &user)
+	createChirp(t, ts, &user)
+	createChirp(t, ts, &user)
+	createChirp(t, ts, &user)
+
+	chirps := listChirps(t, ts, &user, "")
+	for i := 0; i < len(chirps)-1; i++ {
+		if chirps[i].CreatedAt.After(chirps[i+1].CreatedAt) {
+			t.Fatal("Incorrect sorting")
+		}
+	}
+
+	chirps = listChirps(t, ts, &user, "desc")
+	for i := 0; i < len(chirps)-1; i++ {
+		if chirps[i].CreatedAt.Before(chirps[i+1].CreatedAt) {
+			t.Fatal("Incorrect sorting")
+		}
+	}
+}
+
 func createAndLoginUser(
 	t *testing.T, ts *TestServer, email, password string,
 ) models.UserDTO {
@@ -109,10 +136,7 @@ func createChirp(t *testing.T, ts *TestServer, user *models.UserDTO) models.Chir
 	var chirp models.ChirpDTO
 	execPost(t, ts, baseChirpsPath, body, user.Token, "Bearer", http.StatusCreated, &chirp)
 
-	var chirps []models.ChirpDTO
-	get(t, ts, baseChirpsPath, user.Token, http.StatusOK, &chirps)
-
-	for _, listedChirp := range chirps {
+	for _, listedChirp := range listChirps(t, ts, user, "") {
 		if user.ID == *listedChirp.UserID && *listedChirp.Body == chirpBody {
 			chirp = listedChirp
 			break
@@ -130,4 +154,10 @@ func createChirp(t *testing.T, ts *TestServer, user *models.UserDTO) models.Chir
 	}
 
 	return chirp
+}
+
+func listChirps(t *testing.T, ts *TestServer, user *models.UserDTO, sort string) []models.ChirpDTO {
+	var chirps []models.ChirpDTO
+	get(t, ts, baseChirpsPath+"?sort="+sort, user.Token, http.StatusOK, &chirps)
+	return chirps
 }
