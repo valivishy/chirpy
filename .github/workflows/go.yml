@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: valentin
+          POSTGRES_HOST_AUTH_METHOD: trust
           POSTGRES_DB: chirpy_test
         ports:
           - 5432:5432
@@ -32,9 +32,16 @@ jobs:
         with:
           go-version: '1.24'
 
+      - name: Wait for Postgres
+        run: |
+          until pg_isready -h localhost -p 5432; do
+            echo "Waiting for postgres..."
+            sleep 1
+          done
+
       - name: Create .env.test file
         run: |
-          echo "DB_URL=postgres://valentin@localhost:5432/chirpy_test?sslmode=disable" > .env.test
+          echo "DB_URL=postgres://postgres@localhost:5432/chirpy_test?sslmode=disable" > .env.test
           echo "PLATFORM=TEST" >> .env.test
           echo "SECRET=Ra0X6gVbT5yL3UR6bssmsFPXcyUqhhQ24ZXxzjkbhC0IDetGt9Ull8XE7DAZvQcwLkjQj9kNQKvGYLmkfFrXAw==" >> .env.test
 
