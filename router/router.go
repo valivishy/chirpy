@@ -27,6 +27,7 @@ func New(apiConfig *config.Configuration) http.Handler {
 	mux.HandleFunc("POST /api/chirps", handlers.HandleCreateChirp(apiConfig))
 	mux.HandleFunc("GET /api/chirps", handlers.HandleListChirps(apiConfig))
 	mux.HandleFunc("GET /api/chirps/{chirpID}", handlers.HandleGetChirp(apiConfig))
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", handlers.HandleDeleteChirp(apiConfig))
 
 	return mux
 }

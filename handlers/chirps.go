@@ -52,7 +52,6 @@ func HandleCreateChirp(configuration *config.Configuration) func(w http.Response
 
 func HandleListChirps(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-
 		chirps, err := api.Queries.ListChirps(r.Context())
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusBadRequest)
@@ -85,6 +84,22 @@ func HandleGetChirp(api *config.Configuration) func(w http.ResponseWriter, r *ht
 	}
 }
 
+func HandleDeleteChirp(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		chirp, failed := getChirp(w, r, configuration)
+		if failed {
+			return
+		}
+
+		if err := configuration.Queries.DeleteChirp(r.Context(), chirp.ID); err != nil {
+			respondWithError(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		printJsonResponse(w, "", http.StatusNoContent)
+	}
+}
+
 func mapChirp(chirp database.Chirp) models.ChirpDTO {
 	return models.ChirpDTO{
 		ID:        &chirp.ID,
@@ -93,4 +108,35 @@ func mapChirp(chirp database.Chirp) models.ChirpDTO {
 		Body:      &chirp.Body,
 		UserID:    &chirp.UserID,
 	}
+}
+
+func getChirp(w http.ResponseWriter, r *http.Request, configuration *config.Configuration) (database.Chirp, bool) {
+	userId, err := validateJWT(configuration, r.Header)
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusUnauthorized)
+		return database.Chirp{}, true
+	}
+
+	value := r.PathValue("chirpID")
+	if value == "" {
+		respondWithError(w, "ChirpID path variable is mandatory", http.StatusBadRequest)
+	}
+
+	chirp, err := configuration.Queries.GetChirp(r.Context(), uuid.MustParse(value))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusNotFound)
+		return database.Chirp{}, true
+	}
+
+	if chirp.UserID != userId {
+		respondWithError(w, "", http.StatusForbidden)
+		return database.Chirp{}, true
+	}
+
+	if len(chirp.Body) == 0 {
+		respondWithError(w, "", http.StatusNotFound)
+		return database.Chirp{}, true
+	}
+
+	return chirp, false
 }

@@ -42,6 +42,7 @@ func HandleLogin(configuration *config.Configuration) func(w http.ResponseWriter
 		refreshToken, err := auth.MakeRefreshToken()
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		_, err = configuration.Queries.CreateRefreshToken(r.Context(), database.CreateRefreshTokenParams{
@@ -51,6 +52,7 @@ func HandleLogin(configuration *config.Configuration) func(w http.ResponseWriter
 		})
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusInternalServerError)
+			return
 		}
 
 		printJsonResponse(w, mappers.MapUser(user, jwt, refreshToken), http.StatusOK)

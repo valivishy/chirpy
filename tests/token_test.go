@@ -20,7 +20,7 @@ func TestHandleRefresh_Success(t *testing.T) {
 	}
 
 	var response models.RefreshTokenResponse
-	post(t, ts, "/api/refresh", "", user.RefreshToken, http.StatusOK, &response)
+	execPost(t, ts, "/api/refresh", "", user.RefreshToken, http.StatusOK, &response)
 
 	if len(response.Token) == 0 {
 		t.Fatalf("Refresh failed: %v", err)
@@ -41,7 +41,7 @@ func TestHandleRevoke_Success(t *testing.T) {
 	}
 
 	var response models.RefreshTokenResponse
-	post(t, ts, "/api/revoke", "", user.RefreshToken, http.StatusNoContent, &response)
+	execPost(t, ts, "/api/revoke", "", user.RefreshToken, http.StatusNoContent, &response)
 
-	post(t, ts, "/api/refresh", "", user.RefreshToken, http.StatusUnauthorized, &response)
+	execPost(t, ts, "/api/refresh", "", user.RefreshToken, http.StatusUnauthorized, &response)
 }
