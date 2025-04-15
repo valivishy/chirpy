@@ -41,38 +41,3 @@ func (q *Queries) CreateRefreshToken(ctx context.Context, arg CreateRefreshToken
 	)
 	return i, err
 }
-
-const listRefreshTokens = `-- name: ListRefreshTokens :many
-SELECT token, created_at, updated_at, user_id, expires_at, revoked_at
-FROM refresh_tokens
-`
-
-func (q *Queries) ListRefreshTokens(ctx context.Context) ([]RefreshToken, error) {
-	rows, err := q.db.QueryContext(ctx, listRefreshTokens)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []RefreshToken
-	for rows.Next() {
-		var i RefreshToken
-		if err := rows.Scan(
-			&i.Token,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.UserID,
-			&i.ExpiresAt,
-			&i.RevokedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}

@@ -8,7 +8,6 @@ import (
 	"chirpy/models"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 )
@@ -98,13 +97,6 @@ func getUserFromRefreshToken(configuration *config.Configuration, r *http.Reques
 	if err != nil {
 		return nil, err
 	}
-
-	tokens, err := configuration.Queries.ListRefreshTokens(r.Context())
-	if err != nil {
-		return nil, err
-	}
-
-	fmt.Print(tokens)
 
 	user, err := configuration.Queries.GetUserFromRefreshToken(r.Context(), token)
 	if err != nil {

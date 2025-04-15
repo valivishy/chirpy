@@ -6,8 +6,3 @@ VALUES (
    $3
 )
 RETURNING *;
-
-
--- name: ListRefreshTokens :many
-SELECT *
-FROM refresh_tokens;
