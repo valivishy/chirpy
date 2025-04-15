@@ -25,7 +25,7 @@ func TestHandleCreateUser_Duplicate(t *testing.T) {
 	password := "superPassword1232"
 
 	createUser(t, ts, email, password)
-	payload := buildUserCreateOrLoginPayload(email, password)
+	payload := buildUserRequestPayload(email, password)
 
 	resp2, err := http.Post(ts.BaseURL+"/api/users", "application/json", strings.NewReader(payload))
 	if err != nil {

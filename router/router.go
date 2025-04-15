@@ -17,10 +17,12 @@ func New(apiConfig *config.Configuration) http.Handler {
 	mux.HandleFunc("GET /admin/metrics", handlers.HandleAdminMetrics(apiConfig))
 	mux.HandleFunc("POST /admin/reset", handlers.HandleAdminReset(apiConfig))
 
-	mux.HandleFunc("POST /api/users", handlers.HandleCreate(apiConfig))
 	mux.HandleFunc("POST /api/login", handlers.HandleLogin(apiConfig))
 	mux.HandleFunc("POST /api/refresh", handlers.HandleRefresh(apiConfig))
 	mux.HandleFunc("POST /api/revoke", handlers.HandleRevoke(apiConfig))
+
+	mux.HandleFunc("POST /api/users", handlers.HandleCreate(apiConfig))
+	mux.HandleFunc("PUT /api/users", handlers.HandleUpdate(apiConfig))
 
 	mux.HandleFunc("POST /api/chirps", handlers.HandleCreateChirp(apiConfig))
 	mux.HandleFunc("GET /api/chirps", handlers.HandleListChirps(apiConfig))

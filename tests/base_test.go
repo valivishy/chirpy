@@ -1,9 +1,6 @@
 package tests
 
 import (
-	"chirpy/models"
-	"encoding/json"
-	"fmt"
 	_ "github.com/lib/pq"
 	"io"
 )
@@ -21,6 +18,11 @@ import (
 	"strings"
 	"testing"
 )
+
+type TestServer struct {
+	Server  *http.Server
+	BaseURL string
+}
 
 var testDB *sql.DB
 
@@ -94,80 +96,10 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func get[T any](t *testing.T, ts *TestServer, url string, target *T) {
-	t.Helper()
-
-	resp, err := http.Get(ts.BaseURL + url)
-	if err != nil {
-		t.Fatalf("GET %s failed: %v", url, err)
-	}
-	defer closer(t)(resp.Body)
-
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("expected 200 OK, got %d", resp.StatusCode)
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
-		t.Fatalf("failed to decode response body: %v", err)
-	}
-}
-
-func post[T any](
-	t *testing.T, ts *TestServer, url string, body string, token string, expectedStatus int, target *T,
-) {
-	t.Helper()
-
-	req, err := http.NewRequest(http.MethodPost, ts.BaseURL+url, strings.NewReader(body))
-	if err != nil {
-		t.Fatalf("failed to build request: %v", err)
-	}
-	req.Header.Set("Content-Type", "application/json")
-	if token != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		t.Fatalf("POST %s failed: %v", url, err)
-	}
-	defer closer(t)(resp.Body)
-
-	if resp.StatusCode != expectedStatus {
-		t.Fatalf("expected %d, got %d", expectedStatus, resp.StatusCode)
-	}
-
-	if expectedStatus != http.StatusOK && expectedStatus != http.StatusCreated {
-		return
-	}
-
-	// We parse the response only on valid statuses
-	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
-		t.Fatalf("failed to decode response body: %v", err)
-	}
-}
-
-type TestServer struct {
-	Server  *http.Server
-	BaseURL string
-}
-
 func closer(t *testing.T) func(io.Closer) {
 	return func(c io.Closer) {
 		if err := c.Close(); err != nil {
 			t.Fatal(err)
 		}
 	}
-}
-
-func buildUserCreateOrLoginPayload(email string, password string) string {
-	return fmt.Sprintf(`{"email":"%s", "password":"%s"}`, email, password)
-}
-
-func loginUser(t *testing.T, ts *TestServer, email, password string) (*models.UserDTO, error) {
-	loginPayload := buildUserCreateOrLoginPayload(email, password)
-
-	var user models.UserDTO
-	post(t, ts, "/api/login", loginPayload, "", http.StatusOK, &user)
-
-	return &user, nil
 }

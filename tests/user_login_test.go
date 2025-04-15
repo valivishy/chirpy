@@ -24,7 +24,7 @@ func TestHandleLogin_UserNotFound(t *testing.T) {
 	ts := Start(t)
 	defer closer(t)(ts.Server)
 
-	loginPayload := buildUserCreateOrLoginPayload("nouser@example.com", "irrelevant")
+	loginPayload := buildUserRequestPayload("nouser@example.com", "irrelevant")
 	post(t, ts, "/api/login", loginPayload, "", http.StatusUnauthorized, &models.UserDTO{})
 }
 
@@ -37,7 +37,7 @@ func TestHandleLogin_WrongPassword(t *testing.T) {
 	wrongPassword := "badPass"
 	createUser(t, ts, email, correctPassword)
 
-	loginPayload := buildUserCreateOrLoginPayload(email, wrongPassword)
+	loginPayload := buildUserRequestPayload(email, wrongPassword)
 	post(t, ts, "/api/login", loginPayload, "", http.StatusUnauthorized, &models.UserDTO{})
 }
 
@@ -45,6 +45,6 @@ func TestHandleLogin_InvalidEmailFormat(t *testing.T) {
 	ts := Start(t)
 	defer closer(t)(ts.Server)
 
-	payload := buildUserCreateOrLoginPayload("1234", "irrelevant")
+	payload := buildUserRequestPayload("1234", "irrelevant")
 	post(t, ts, "/api/login", payload, "", http.StatusUnauthorized, &models.UserDTO{})
 }
