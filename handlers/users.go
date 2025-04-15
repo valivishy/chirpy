@@ -6,7 +6,6 @@ import (
 	"chirpy/internal/database"
 	"chirpy/mappers"
 	"chirpy/models"
-	"encoding/json"
 	"net/http"
 )
 
@@ -14,10 +13,7 @@ const somethingWentWrong = "Something went wrong"
 
 func HandleCreate(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		decoder := json.NewDecoder(r.Body)
-		requestBody := models.UserRequest{}
-		err := decoder.Decode(&requestBody)
-
+		requestBody, err := decodeRequestPayload[models.UserRequest](r)
 		if err != nil {
 			respondWithError(w, somethingWentWrong, http.StatusBadRequest)
 			return
@@ -43,9 +39,8 @@ func HandleCreate(configuration *config.Configuration) func(w http.ResponseWrite
 
 func HandleUpdate(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		decoder := json.NewDecoder(r.Body)
-		requestBody := models.UserRequest{}
-		if err := decoder.Decode(&requestBody); err != nil {
+		requestBody, err := decodeRequestPayload[models.UserRequest](r)
+		if err != nil {
 			respondWithError(w, somethingWentWrong, http.StatusBadRequest)
 			return
 		}

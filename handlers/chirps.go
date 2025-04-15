@@ -4,7 +4,6 @@ import (
 	"chirpy/config"
 	"chirpy/internal/database"
 	"chirpy/models"
-	"encoding/json"
 	"github.com/google/uuid"
 	"net/http"
 )
@@ -17,9 +16,8 @@ func HandleCreateChirp(configuration *config.Configuration) func(w http.Response
 			return
 		}
 
-		decoder := json.NewDecoder(r.Body)
-		createChirpRequest := models.CreateChirpRequest{}
-		if err = decoder.Decode(&createChirpRequest); err != nil {
+		createChirpRequest, err := decodeRequestPayload[models.CreateChirpRequest](r)
+		if err != nil {
 			respondWithError(w, "Invalid payload", http.StatusBadRequest)
 			return
 		}

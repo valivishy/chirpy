@@ -15,6 +15,14 @@ const applicationJsonContentType = "application/json; charset=utf-8"
 const textPlainContentType = "text/plain; charset=utf-8"
 const textHtmlContentType = "text/html; charset=utf-8"
 
+func decodeRequestPayload[T any](r *http.Request) (*T, error) {
+	decoder := json.NewDecoder(r.Body)
+	var requestBody T
+	err := decoder.Decode(&requestBody)
+
+	return &requestBody, err
+}
+
 func respondWithError(w http.ResponseWriter, errorMessage string, status int) {
 	printResponse(w, errorMessage, applicationJsonContentType, status)
 }

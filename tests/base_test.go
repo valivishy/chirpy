@@ -1,6 +1,7 @@
 package tests
 
 import (
+	"encoding/json"
 	_ "github.com/lib/pq"
 	"io"
 )
@@ -102,4 +103,12 @@ func closer(t *testing.T) func(io.Closer) {
 			t.Fatal(err)
 		}
 	}
+}
+
+func stringify(payload any) string {
+	data, err := json.Marshal(payload)
+	if err != nil {
+		log.Fatalf("failed to marshal: %v", err)
+	}
+	return string(data)
 }

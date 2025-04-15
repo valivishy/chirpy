@@ -6,7 +6,6 @@ import (
 	"chirpy/internal/database"
 	"chirpy/mappers"
 	"chirpy/models"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
@@ -14,9 +13,7 @@ import (
 
 func HandleLogin(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		decoder := json.NewDecoder(r.Body)
-		requestBody := models.LoginUserRequest{}
-		err := decoder.Decode(&requestBody)
+		requestBody, err := decodeRequestPayload[models.LoginUserRequest](r)
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusBadRequest)
 			return

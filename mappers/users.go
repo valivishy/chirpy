@@ -13,5 +13,6 @@ func MapUser(user database.User, jwt string, refreshToken string) models.UserDTO
 		Email:        user.Email,
 		Token:        jwt,
 		RefreshToken: refreshToken,
+		IsChirpyRed:  user.IsChirpyRed,
 	}
 }
