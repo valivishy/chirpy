@@ -13,6 +13,7 @@ type Configuration struct {
 	Queries        *database.Queries
 	Platform       string
 	Secret         string
+	PolkaKey       string
 }
 
 const (
@@ -40,8 +41,15 @@ func Init() *Configuration {
 		panic("No password signing secret provided")
 	}
 
+	polkaKey := os.Getenv("POLKA_KEY")
+	if polkaKey == "" {
+		panic("No polka key provided")
+	}
+
 	return &Configuration{
 		Queries:  database.New(db),
 		Platform: platform,
+		Secret:   secret,
+		PolkaKey: polkaKey,
 	}
 }

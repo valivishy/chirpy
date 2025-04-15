@@ -19,7 +19,7 @@ func loginUser(t *testing.T, ts *TestServer, email, password string) (*models.Us
 	loginPayload := buildUserRequestPayload(email, password)
 
 	var user models.UserDTO
-	execPost(t, ts, "/api/login", loginPayload, "", http.StatusOK, &user)
+	execPost(t, ts, "/api/login", loginPayload, "", "Bearer", http.StatusOK, &user)
 
 	return &user, nil
 }

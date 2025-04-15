@@ -43,26 +43,24 @@ func get[T any](t *testing.T, ts *TestServer, url string, token string, expected
 	}
 }
 
-func execPost[T any](
-	t *testing.T, ts *TestServer, url string, body string, token string, expectedStatus int, target *T,
-) {
-	exec(t, ts, http.MethodPost, url, body, token, expectedStatus, target)
+func execPost[T any](t *testing.T, ts *TestServer, url string, body string, token string, tokenType string, expectedStatus int, target *T) {
+	exec(t, ts, http.MethodPost, url, body, token, tokenType, expectedStatus, target)
 }
 
 func execPut[T any](
 	t *testing.T, ts *TestServer, url string, body string, token string, expectedStatus int, target *T,
 ) {
-	exec(t, ts, http.MethodPut, url, body, token, expectedStatus, target)
+	exec(t, ts, http.MethodPut, url, body, token, "Bearer", expectedStatus, target)
 }
 
 func execDelete(
 	t *testing.T, ts *TestServer, url string, token string, expectedStatus int,
 ) {
-	exec(t, ts, http.MethodDelete, url, "", token, expectedStatus, &struct{}{})
+	exec(t, ts, http.MethodDelete, url, "", token, "Bearer", expectedStatus, &struct{}{})
 }
 
 func exec[T any](
-	t *testing.T, ts *TestServer, method string, url string, body string, token string, expectedStatus int, target *T,
+	t *testing.T, ts *TestServer, method string, url string, body string, token string, tokenType string, expectedStatus int, target *T,
 ) {
 	t.Helper()
 
@@ -72,7 +70,7 @@ func exec[T any](
 	}
 	req.Header.Set("Content-Type", "application/json")
 	if token != "" {
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+		req.Header.Set("Authorization", fmt.Sprintf("%s %s", tokenType, token))
 	}
 
 	resp, err := http.DefaultClient.Do(req)

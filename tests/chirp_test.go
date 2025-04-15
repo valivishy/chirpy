@@ -28,7 +28,7 @@ func TestHandleCreateChirp_TooLong(t *testing.T) {
 	longBody := strings.Repeat("a", 141)
 	payload := fmt.Sprintf(`{"body":"%s"`, longBody)
 
-	execPost(t, ts, baseChirpsPath, payload, user.Token, http.StatusBadRequest, &models.ChirpDTO{})
+	execPost(t, ts, baseChirpsPath, payload, user.Token, "Bearer", http.StatusBadRequest, &models.ChirpDTO{})
 }
 
 func TestHandleCreateChirp_BannedWords(t *testing.T) {
@@ -40,7 +40,7 @@ func TestHandleCreateChirp_BannedWords(t *testing.T) {
 	body := `{"body":"This is a kerfuffle tweet"}`
 
 	var chirp models.ChirpDTO
-	execPost(t, ts, baseChirpsPath, body, user.Token, http.StatusCreated, &chirp)
+	execPost(t, ts, baseChirpsPath, body, user.Token, "Bearer", http.StatusCreated, &chirp)
 
 	if !strings.Contains(*chirp.Body, "****") {
 		t.Errorf("expected banned word to be filtered: %s", *chirp.Body)
@@ -54,7 +54,7 @@ func TestHandleCreateChirp_InvalidPayload(t *testing.T) {
 	user := createAndLoginUser(t, ts, "filter_faulty@chirp.com", "chirpyfilter")
 
 	payload := `{"body":false}`
-	execPost(t, ts, baseChirpsPath, payload, user.Token, http.StatusBadRequest, &models.ChirpDTO{})
+	execPost(t, ts, baseChirpsPath, payload, user.Token, "Bearer", http.StatusBadRequest, &models.ChirpDTO{})
 }
 
 func TestHandleDeleteChirp_Valid(t *testing.T) {
@@ -107,7 +107,7 @@ func createChirp(t *testing.T, ts *TestServer, user *models.UserDTO) models.Chir
 	body := `{"body":"` + chirpBody + `"}`
 
 	var chirp models.ChirpDTO
-	execPost(t, ts, baseChirpsPath, body, user.Token, http.StatusCreated, &chirp)
+	execPost(t, ts, baseChirpsPath, body, user.Token, "Bearer", http.StatusCreated, &chirp)
 
 	var chirps []models.ChirpDTO
 	get(t, ts, baseChirpsPath, user.Token, http.StatusOK, &chirps)

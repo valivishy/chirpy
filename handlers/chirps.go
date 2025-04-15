@@ -50,7 +50,21 @@ func HandleCreateChirp(configuration *config.Configuration) func(w http.Response
 
 func HandleListChirps(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		chirps, err := api.Queries.ListChirps(r.Context())
+		userId := r.URL.Query().Get("author_id")
+
+		var chirps []database.Chirp
+		var err error
+		if userId == "" {
+			chirps, err = api.Queries.ListAllChirps(r.Context())
+		} else {
+			userID, err2 := uuid.Parse(userId)
+			if err2 != nil {
+				respondWithError(w, err2.Error(), http.StatusBadRequest)
+				return
+			}
+
+			chirps, err = api.Queries.ListChirpsByUser(r.Context(), userID)
+		}
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusBadRequest)
 			return

@@ -2,12 +2,19 @@ package handlers
 
 import (
 	"chirpy/config"
+	"chirpy/internal/auth"
 	"chirpy/models"
 	"net/http"
 )
 
 func HandleWebhook(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		key, err := auth.GetAPIKey(r.Header)
+		if err != nil || key != configuration.PolkaKey {
+			respondWithError(w, "", http.StatusUnauthorized)
+			return
+		}
+
 		webhookRequest, err := decodeRequestPayload[models.WebhookRequest](r)
 		if err != nil {
 			respondWithError(w, somethingWentWrong, http.StatusBadRequest)

@@ -23,7 +23,7 @@ func TestHandleUpdate(t *testing.T) {
 
 	execPut(t, ts, "/api/users", buildUserRequestPayload(newEmail, newPassword), user.Token, http.StatusOK, &user)
 
-	execPost(t, ts, "/api/login", buildUserRequestPayload(email, password), "", http.StatusUnauthorized, &user)
+	execPost(t, ts, "/api/login", buildUserRequestPayload(email, password), "", "Bearer", http.StatusUnauthorized, &user)
 
 	user, err = loginUser(t, ts, newEmail, newPassword)
 	if err != nil {

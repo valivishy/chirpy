@@ -25,7 +25,7 @@ func TestHandleLogin_UserNotFound(t *testing.T) {
 	defer closer(t)(ts.Server)
 
 	loginPayload := buildUserRequestPayload("nouser@example.com", "irrelevant")
-	execPost(t, ts, "/api/login", loginPayload, "", http.StatusUnauthorized, &models.UserDTO{})
+	execPost(t, ts, "/api/login", loginPayload, "", "Bearer", http.StatusUnauthorized, &models.UserDTO{})
 }
 
 func TestHandleLogin_WrongPassword(t *testing.T) {
@@ -38,7 +38,7 @@ func TestHandleLogin_WrongPassword(t *testing.T) {
 	createUser(t, ts, email, correctPassword)
 
 	loginPayload := buildUserRequestPayload(email, wrongPassword)
-	execPost(t, ts, "/api/login", loginPayload, "", http.StatusUnauthorized, &models.UserDTO{})
+	execPost(t, ts, "/api/login", loginPayload, "", "Bearer", http.StatusUnauthorized, &models.UserDTO{})
 }
 
 func TestHandleLogin_InvalidEmailFormat(t *testing.T) {
@@ -46,5 +46,5 @@ func TestHandleLogin_InvalidEmailFormat(t *testing.T) {
 	defer closer(t)(ts.Server)
 
 	payload := buildUserRequestPayload("1234", "irrelevant")
-	execPost(t, ts, "/api/login", payload, "", http.StatusUnauthorized, &models.UserDTO{})
+	execPost(t, ts, "/api/login", payload, "", "Bearer", http.StatusUnauthorized, &models.UserDTO{})
 }
