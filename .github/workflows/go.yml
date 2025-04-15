@@ -41,9 +41,9 @@ jobs:
 
       - name: Create .env.test file
         run: |
-          echo "DB_URL=postgres://postgres@localhost:5432/chirpy_test?sslmode=disable" > .env
-          echo "PLATFORM=TEST" >> .env
-          echo "SECRET=Ra0X6gVbT5yL3UR6bssmsFPXcyUqhhQ24ZXxzjkbhC0IDetGt9Ull8XE7DAZvQcwLkjQj9kNQKvGYLmkfFrXAw==" >> .env
+          echo "DB_URL=postgres://postgres@localhost:5432/chirpy_test?sslmode=disable" > ./tests/.env
+          echo "PLATFORM=TEST" >> ./tests/.env
+          echo "SECRET=Ra0X6gVbT5yL3UR6bssmsFPXcyUqhhQ24ZXxzjkbhC0IDetGt9Ull8XE7DAZvQcwLkjQj9kNQKvGYLmkfFrXAw==" >> ./tests/.env
 
       - name: Test
         run: go test -v ./...
