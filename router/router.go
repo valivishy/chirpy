@@ -19,6 +19,8 @@ func New(apiConfig *config.Configuration) http.Handler {
 
 	mux.HandleFunc("POST /api/users", handlers.HandleCreate(apiConfig))
 	mux.HandleFunc("POST /api/login", handlers.HandleLogin(apiConfig))
+	mux.HandleFunc("POST /api/refresh", handlers.HandleRefresh(apiConfig))
+	mux.HandleFunc("POST /api/revoke", handlers.HandleRevoke(apiConfig))
 
 	mux.HandleFunc("POST /api/chirps", handlers.HandleCreateChirp(apiConfig))
 	mux.HandleFunc("GET /api/chirps", handlers.HandleListChirps(apiConfig))

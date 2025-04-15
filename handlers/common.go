@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"chirpy/config"
+	"chirpy/internal/auth"
 	"encoding/json"
+	"github.com/google/uuid"
 	"log"
 	"net/http"
 	"strings"
@@ -17,6 +20,12 @@ func respondWithError(w http.ResponseWriter, errorMessage string, status int) {
 }
 
 func printJsonResponse(w http.ResponseWriter, respBody any, statusCode int) {
+	w.WriteHeader(statusCode)
+
+	if statusCode == http.StatusNoContent || statusCode == http.StatusNotModified {
+		return
+	}
+
 	dat, err := json.Marshal(respBody)
 	if err != nil {
 		log.Printf("Error marshalling JSON: %s", err)
@@ -24,8 +33,6 @@ func printJsonResponse(w http.ResponseWriter, respBody any, statusCode int) {
 
 		return
 	}
-
-	w.WriteHeader(statusCode)
 	w.Header().Set(contentTypeHeaderName, applicationJsonContentType)
 	_, err = w.Write(dat)
 	if err != nil {
@@ -55,4 +62,13 @@ func replaceInsensitive(input, old, new string) string {
 		return input
 	}
 	return input[:index] + new + input[index+len(old):]
+}
+
+func validateJWT(configuration *config.Configuration, headers http.Header) (uuid.UUID, error) {
+	token, err := auth.GetBearerToken(headers)
+	if err != nil {
+		return uuid.New(), err // in case of error, the UUID is irrelevant
+	}
+
+	return auth.ValidateJWT(token, configuration.Secret)
 }

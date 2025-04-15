@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"chirpy/config"
-	"chirpy/internal/auth"
 	"chirpy/internal/database"
 	"chirpy/models"
 	"encoding/json"
@@ -10,15 +9,9 @@ import (
 	"net/http"
 )
 
-func HandleCreateChirp(api *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
+func HandleCreateChirp(configuration *config.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		token, err := auth.GetBearerToken(r.Header)
-		if err != nil {
-			respondWithError(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
-
-		userId, err := auth.ValidateJWT(token, api.Secret)
+		userId, err := validateJWT(configuration, r.Header)
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusUnauthorized)
 			return
@@ -41,7 +34,7 @@ func HandleCreateChirp(api *config.Configuration) func(w http.ResponseWriter, r 
 			text = replaceInsensitive(text, word, "**** ")
 		}
 
-		chirp, err := api.Queries.CreateChirp(
+		chirp, err := configuration.Queries.CreateChirp(
 			r.Context(),
 			database.CreateChirpParams{
 				Body:   text,

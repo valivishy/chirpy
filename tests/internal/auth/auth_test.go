@@ -6,7 +6,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"testing"
-	"time"
 )
 
 func TestHashPassword_Success(t *testing.T) {
@@ -47,9 +46,8 @@ func TestCheckPasswordHash_Failure(t *testing.T) {
 func TestMakeAndValidateJWT(t *testing.T) {
 	userID := uuid.New()
 	secret := "supersecret"
-	expiresIn := time.Hour
 
-	token, err := auth.MakeJWT(userID, secret, expiresIn)
+	token, err := auth.MakeJWT(userID, secret)
 	if err != nil {
 		t.Fatalf("failed to generate JWT: %v", err)
 	}
@@ -73,7 +71,7 @@ func TestValidateJWT_InvalidToken(t *testing.T) {
 
 func TestValidateJWT_WrongSecret(t *testing.T) {
 	userID := uuid.New()
-	token, err := auth.MakeJWT(userID, "rightsecret", time.Hour)
+	token, err := auth.MakeJWT(userID, "rightsecret")
 	if err != nil {
 		t.Fatalf("failed to generate JWT: %v", err)
 	}

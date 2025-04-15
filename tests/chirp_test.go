@@ -18,7 +18,7 @@ func TestHandleCreateChirp_Valid(t *testing.T) {
 	password := "chirpy123"
 	userId := createUser(t, ts, email, password)
 
-	token, err := loginUser(t, ts, email, password)
+	user, err := loginUser(t, ts, email, password)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +27,7 @@ func TestHandleCreateChirp_Valid(t *testing.T) {
 	body := `{"body":"` + chirpBody + `"}`
 
 	var chirp models.ChirpDTO
-	post(t, ts, baseChirpsPath, body, token, http.StatusCreated, &chirp)
+	post(t, ts, baseChirpsPath, body, user.Token, http.StatusCreated, &chirp)
 
 	var chirps []models.ChirpDTO
 	get(t, ts, baseChirpsPath, &chirps)
@@ -93,9 +93,9 @@ func createAndLoginUser(
 ) string {
 	createUser(t, ts, email, password)
 
-	token, err := loginUser(t, ts, email, password)
+	user, err := loginUser(t, ts, email, password)
 	if err != nil {
 		t.Fatal(err)
 	}
-	return token
+	return user.Token
 }

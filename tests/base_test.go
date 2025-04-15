@@ -1,9 +1,11 @@
 package tests
 
 import (
+	"chirpy/models"
 	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
+	"io"
 )
 
 import (
@@ -120,7 +122,9 @@ func post[T any](
 		t.Fatalf("failed to build request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	if token != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
+	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
@@ -140,4 +144,30 @@ func post[T any](
 	if err := json.NewDecoder(resp.Body).Decode(target); err != nil {
 		t.Fatalf("failed to decode response body: %v", err)
 	}
+}
+
+type TestServer struct {
+	Server  *http.Server
+	BaseURL string
+}
+
+func closer(t *testing.T) func(io.Closer) {
+	return func(c io.Closer) {
+		if err := c.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}
+}
+
+func buildUserCreateOrLoginPayload(email string, password string) string {
+	return fmt.Sprintf(`{"email":"%s", "password":"%s"}`, email, password)
+}
+
+func loginUser(t *testing.T, ts *TestServer, email, password string) (*models.UserDTO, error) {
+	loginPayload := buildUserCreateOrLoginPayload(email, password)
+
+	var user models.UserDTO
+	post(t, ts, "/api/login", loginPayload, "", http.StatusOK, &user)
+
+	return &user, nil
 }
